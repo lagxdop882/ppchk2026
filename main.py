@@ -13,7 +13,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 # Bot Configuration
-TOKEN = '8568309620:AAG9dBWt2kdlN5yOUxg0ZMgZNSa9SvDm8Ag'
+TOKEN = '8568309620:AAGxoy2C2od9v4w8VKskKRhSttlXCjXs1g4'
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
