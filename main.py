@@ -19,7 +19,7 @@ storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 # Global Variables
-admin = 7926510116
+admin = 8597415233
 myid = ['8597415233']
 stopuser = {}
 command_usage = {}
