@@ -5,7 +5,7 @@ from telebot import types
 import requests, random, os, pickle, time, re
 from bs4 import BeautifulSoup
 #
-token = '8568309620:AAGxoy2C2od9v4w8VKskKRhSttlXCjXs1g4'
+token = '7961200564:AAHx0T0k_dx_DkKKJjnDoG0jESXFb_OHfOo'
 bot = telebot.TeleBot(token, parse_mode="HTML")
 
 #
