@@ -1,0 +1,7 @@
+pyTelegramBotAPI
+requests
+PyJWT
+fake-useragent
+user_agent
+beautifulsoup4
+cloudscraper
