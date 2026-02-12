@@ -1,3 +1,4 @@
+import playwright install
 import asyncio
 import aiohttp
 import aiofiles
