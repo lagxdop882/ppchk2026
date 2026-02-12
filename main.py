@@ -18,7 +18,7 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
 # Bot Configuration
-TOKEN = '8568309620:AAGxoy2C2od9v4w8VKskKRhSttlXCjXs1g4'
+TOKEN = '8568309620:AAFror7IaoPcQrzEUQKOxh180iHMApVLubQ'
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
