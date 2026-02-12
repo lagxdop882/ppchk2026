@@ -18,14 +18,14 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
 # Bot Configuration
-TOKEN = '8591869223:AAFlYWSL9i3x_5KCXAxdGHG2rBcgx6x2-Wk'
+TOKEN = '8568309620:AAGxoy2C2od9v4w8VKskKRhSttlXCjXs1g4'
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 # Global Variables
-admin = 7926510116
-myid = ['7926510116']
+admin = 8597415233
+myid = ['8597415233']
 stopuser = {}
 command_usage = {}
 
@@ -265,7 +265,7 @@ async def pali(ccx: str, max_retries=5):
             form_data.add_field('give_last', 'lkh')
             form_data.add_field('give_company_option', 'no')
             form_data.add_field('give_company_name', '')
-            form_data.add_field('give_email', 'bnnbbhnn@gmail.com')
+            form_data.add_field('give_email', 'lagxd71@gmail.com')
             form_data.add_field('card_name', 'Ali')
             form_data.add_field('card_exp_month', '')
             form_data.add_field('card_exp_year', '')
