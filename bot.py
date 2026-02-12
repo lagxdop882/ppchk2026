@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 PayPal $1 Rain Checker - Railway Deploy
-Owner: @TomanSamurai (7926510116)
+Owner: @TomanSamurai (8597415233)
 """
 
 import asyncio
