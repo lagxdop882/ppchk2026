@@ -1,20 +1,26 @@
-import telebot
+import asyncio
+import aiohttp
+import aiofiles
 import time
-import threading,cloudscraper
-from telebot import types
-import requests, random, os, pickle, time, re
-from bs4 import BeautifulSoup
+import re
+import base64
+from datetime import datetime
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import Command
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
-#
-token = '8505905087:AAGQtcaMqK2gHrFEKFGNEDbkK41Inz35hkM'
-bot = telebot.TeleBot(token, parse_mode="HTML")
+# Bot Configuration
+TOKEN = '8505905087:AAGQtcaMqK2gHrFEKFGNEDbkK41Inz35hkM'
+bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
 
-#
+# Global Variables
 admin = 8597415233
 myid = ['8597415233']
-stop = {}
-user_gateways = {}
-stop_flags = {} 
 stopuser = {}
 command_usage = {}
 
@@ -61,6 +67,7 @@ def luhn_check(number: str) -> bool:
                 n -= 9
         total += n
     return total % 10 == 0
+
 
 mes = types.InlineKeyboardMarkup()
 mes.add(types.InlineKeyboardButton(text="Start Checking", callback_data="start"))
