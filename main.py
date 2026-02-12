@@ -1,16 +1,9 @@
-import asyncio
-import aiohttp
-import aiofiles
+import telebot
 import time
-import re
-import base64
-from datetime import datetime
-from aiogram import Bot, Dispatcher, types, F
-from aiogram.filters import Command
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
-from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
+import threading,cloudscraper
+from telebot import types
+import requests, random, os, pickle, time, re
+from bs4 import BeautifulSoup
 
 #
 token = '8505905087:AAGQtcaMqK2gHrFEKFGNEDbkK41Inz35hkM'
